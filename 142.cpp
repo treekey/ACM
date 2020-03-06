@@ -100,7 +100,6 @@ void Window::add_region(const Point& left_top, const Point& right_bottom)
     {
         if (region.contain(icons_[i].position()))
         {
-            cout << "icons " << icons_[i].id() << " hide" << endl;
             icons_[i].set_visible(false);
         }
     }
