@@ -5,6 +5,8 @@
 #include <iomanip>
 using namespace std;
 
+const int MAX_WIDTH = 500;
+const int MAX_HEIGHT = 500;
 
 struct Point
 {
@@ -13,73 +15,73 @@ struct Point
 
     Point(int x, int y):x_(x), y_(y) {}
 
-    int square_distance(const Point& p) const 
-    { 
+    int square_distance(const Point& p) const
+    {
         return (x_ - p.x_) * (x_ - p.x_) +
-               (y_ - p.y_) * (y_ - p.y_); 
+            (y_ - p.y_) * (y_ - p.y_);
     }
 };
 
-class Icon 
+class Icon
 {
-public: 
-    Icon(int id, Point p)
-        : id_(id)
-          , p_(p)
-          , visible_(true)
+    public:
+        Icon(int id, Point p)
+            : id_(id)
+              , p_(p)
+              , visible_(true)
     {
     }
 
-    void set_visible(bool visible) { visible_ = visible; }
+        void set_visible(bool visible) { visible_ = visible; }
 
-    int   id()       const { return id_;}
-    Point position() const { return p_; }
-    bool  visible()  const { return visible_; }
+        int   id()       const { return id_;}
+        Point position() const { return p_; }
+        bool  visible()  const { return visible_; }
 
-private:
-    int id_;
-    Point p_;
-    bool visible_;
+    private:
+        int id_;
+        Point p_;
+        bool visible_;
 };
 
 
 class Region
 {
-public: 
-    Region(int id, Point left_top, Point right_bottom)
-        : id_(id + 'A')
-        , left_top_(left_top)
-        , right_bottom_(right_bottom)
+    public:
+        Region(int id, Point left_top, Point right_bottom)
+            : id_(id + 'A')
+              , left_top_(left_top)
+              , right_bottom_(right_bottom)
     {
     }
 
-    bool contain(Point p) const
-    {
-        return (p.x_ >= left_top_.x_ && p.x_ <= right_bottom_.x_
-                && p.y_ >= left_top_.y_ && p.y_ <= right_bottom_.y_);
-    }
+        bool contain(Point p) const
+        {
+            return (p.x_ >= left_top_.x_ && p.x_ <= right_bottom_.x_
+                    && p.y_ >= left_top_.y_ && p.y_ <= right_bottom_.y_);
+        }
 
-    string id () const { return string(1, id_); }
-private:
-    char id_;
-    Point left_top_;
-    Point right_bottom_;
+        string id () const { return string(1, id_); }
+    private:
+        char id_;
+        Point left_top_;
+        Point right_bottom_;
 };
 
 
-class Window 
+class Window
 {
-public:
-    void add_icon(const Point& p);
-    void add_region(const Point& left_top, const Point& right_bottom);
-    string click (const Point& p);
+    public:
+        void add_icon(const Point& p);
+        void add_region(const Point& left_top, const Point& right_bottom);
+        string click (const Point& p);
 
-private:
-    vector<Icon> find_closet_icons(const Point& p);
+    private:
+        vector<Icon> find_closet_icons(const Point& p);
 
-private:
-    vector<Icon> icons_;
-    vector<Region> regions_;
+    private:
+        vector<Icon> icons_;
+        vector<Region> regions_;
 
 };
 
@@ -87,6 +89,14 @@ void Window::add_icon(const Point& p)
 {
     static int next_icon_id = 1;
     Icon icon(next_icon_id++, p);
+
+    for (int i = 0; i < regions_.size(); ++i)
+    {
+        if (regions_[i].contain(p))
+        {
+            icon.set_visible(false);
+        }
+    }
     icons_.push_back(icon);
 }
 
@@ -109,9 +119,9 @@ void Window::add_region(const Point& left_top, const Point& right_bottom)
 vector<Icon> Window::find_closet_icons(const Point& p)
 {
     vector<Icon> closest_icons;
-    if (icons_.size() > 0) 
+    if (icons_.size() > 0)
     {
-        int min = Point(0, 0).square_distance(Point(499, 499));
+        int min = Point(0, 0).square_distance(Point(MAX_WIDTH - 1, MAX_HEIGHT - 1));
         for (int i = 0; i < icons_.size(); ++i)
         {
             if (icons_[i].visible())
@@ -135,7 +145,7 @@ vector<Icon> Window::find_closet_icons(const Point& p)
 
 string Window::click(const Point& p)
 {
-    if (p.x_ < 0 || p.y_ < 0 || p.x_ > 499 || p.y_ > 499)
+    if (p.x_ < 0 || p.y_ < 0 || p.x_ >= MAX_WIDTH || p.y_ >= MAX_HEIGHT)
     {
         //assert(0);
         return "invalid operation";
@@ -169,28 +179,28 @@ int main()
         switch (op)
         {
             case 'I':
-            {
-                int x, y;
-                cin >> x >> y;
-                w.add_icon(Point(x, y));
-                break;
-            }
+                {
+                    int x, y;
+                    cin >> x >> y;
+                    w.add_icon(Point(x, y));
+                    break;
+                }
             case 'R':
-            {
-                int x1, y1;
-                int x2, y2;
-                cin >> x1 >> y1 >> x2 >> y2;
-                w.add_region(Point(x1, y1), Point(x2, y2));
-                break;
-            }
+                {
+                    int x1, y1;
+                    int x2, y2;
+                    cin >> x1 >> y1 >> x2 >> y2;
+                    w.add_region(Point(x1, y1), Point(x2, y2));
+                    break;
+                }
             case 'M':
-            {
-                int x, y;
-                cin >> x >> y;
-                string result = w.click(Point(x, y));
-                cout << result << endl;
-                break;
-            }
+                {
+                    int x, y;
+                    cin >> x >> y;
+                    string result = w.click(Point(x, y));
+                    cout << result << endl;
+                    break;
+                }
             case '#':
                 return 0;
         }
