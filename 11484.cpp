@@ -8,7 +8,23 @@ using namespace std;
 #define CMD_PREVIOS_SIBLING "previous_sibling"
 #define CMD_PARENT "parent"
 
+string extract_value(string s)
+{
+    size_t first = s.find_first_of("'") + 1;
+    size_t last = s.find_last_of("'") - 1;
+
+    return s.substr(first, last - first + 1);
+}
+
 struct Node {
+    Node(string raw)
+        : raw_(raw)
+        , value_(extract_value(raw))
+        , parent_ (NULL) {
+        raw_ = raw;
+    }
+
+    string raw_;
     string value_;
     Node* parent_;
     vector<Node*> childs_;
@@ -26,14 +42,6 @@ private:
     vector<Node*> nodes_; 
 };
 
-string extract_value(string s)
-{
-    size_t first = s.find_first_of("'") + 1;
-    size_t last = s.find_last_of("'") - 1;
-
-    return s.substr(first, last - first + 1);
-}
-
 Parser::Parser(const vector<string>& lines)
 {
     Node* current_node = NULL;
@@ -45,9 +53,7 @@ Parser::Parser(const vector<string>& lines)
         }
         else 
         {
-            Node* new_node = new Node();
-            new_node->value_ = extract_value(lines[i]);
-            
+            Node* new_node = new Node(lines[i]);
             if (current_node != NULL)
             {
                 new_node->parent_ = current_node;
@@ -118,7 +124,6 @@ int main()
             getline(cin, s);
             lines.push_back(s);
         }
-        
         Parser parser(lines);
 
         int command_count = 0;
